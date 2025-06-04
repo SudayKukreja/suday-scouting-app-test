@@ -16,7 +16,22 @@ async function loadWorkbook() {
     await workbook.xlsx.readFile(filePath);
   } else {
     const sheet = workbook.addWorksheet('ScoutingData');
-    sheet.addRow(['Scouter Name', 'Team Number', 'Auto Notes', 'Teleop Notes', 'Endgame Notes']);
+    sheet.addRow([
+      'Scouter Name',
+      'Team Number',
+      'Auto Points',
+      'Auto Scored',
+      'Auto Notes',
+      'Teleop Points',
+      'Teleop Scored',
+      'Offense Rating',
+      'Defense Rating',
+      'Teleop Notes',
+      'Did Park',
+      'Did Climb',
+      'Endgame Notes',
+      'Submission Time'
+    ]);
     await workbook.xlsx.writeFile(filePath);
   }
 }
@@ -26,13 +41,24 @@ app.post('/submit', async (req, res) => {
     await loadWorkbook();
     const sheet = workbook.getWorksheet('ScoutingData');
     const data = req.body;
+
     sheet.addRow([
       data.scouterName,
       data.teamNumber,
-      data.autoNotes,
-      data.teleopNotes,
-      data.endgameNotes,
+      data.autoPoints || '',
+      data.autoScored || '',
+      data.autoNotes || '',
+      data.teleopPoints || '',
+      data.teleopScored || '',
+      data.offenseRating || '',
+      data.defenseRating || '',
+      data.teleopNotes || '',
+      data.didPark || '',
+      data.didClimb || '',
+      data.endgameNotes || '',
+      data.submissionTime || ''
     ]);
+
     await workbook.xlsx.writeFile(filePath);
     res.status(200).send({ message: 'Data saved to Excel file' });
   } catch (error) {

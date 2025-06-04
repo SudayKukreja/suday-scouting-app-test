@@ -4,7 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FRC Scouting Form</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Simple tab styles */
+    .tabs {
+      display: flex;
+      margin-bottom: 1em;
+    }
+    .tab {
+      flex: 1;
+      padding: 0.5em;
+      background: #eee;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      border-bottom: none;
+    }
+    .tab.active {
+      background: white;
+      font-weight: bold;
+      border-bottom: 1px solid white;
+    }
+    .tab-content {
+      border: 1px solid #ccc;
+      padding: 1em;
+      background: white;
+    }
+    .hidden {
+      display: none;
+    }
+    input, textarea, select {
+      width: 100%;
+      margin: 0.5em 0;
+      padding: 0.4em;
+      box-sizing: border-box;
+    }
+  </style>
 </head>
 <body>
   <main>
@@ -12,19 +46,106 @@
     <form id="scoutingForm" autocomplete="off">
       <input name="scouterName" type="text" placeholder="Your Name" required />
       <input name="teamNumber" type="text" placeholder="Team Number" required />
-      <textarea name="autoNotes" placeholder="Autonomous notes"></textarea>
-      <textarea name="teleopNotes" placeholder="Teleop notes"></textarea>
-      <textarea name="endgameNotes" placeholder="Endgame notes"></textarea>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="auto">Autonomous</div>
+        <div class="tab" data-tab="teleop">Teleop</div>
+        <div class="tab" data-tab="endgame">Endgame</div>
+      </div>
+
+      <div id="auto" class="tab-content">
+        <label># Points Scored (Auto):</label>
+        <input name="autoPoints" type="number" min="0" value="0" required />
+        
+        <label>Where / What Scored (Auto):</label>
+        <textarea name="autoScored" placeholder="Example: Coral Zone, Algae Zone..."></textarea>
+
+        <label>Auto Notes:</label>
+        <textarea name="autoNotes" placeholder="Any other autonomous notes"></textarea>
+      </div>
+
+      <div id="teleop" class="tab-content hidden">
+        <label># Points Scored (Teleop):</label>
+        <input name="teleopPoints" type="number" min="0" value="0" required />
+
+        <label>Where / What Scored (Teleop):</label>
+        <textarea name="teleopScored" placeholder="Example: Coral Zone, Algae Zone..."></textarea>
+
+        <label>Offense Rating (out of 5):</label>
+        <select name="offenseRating" required>
+          <option value="">Select</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+
+        <label>Defense Rating (out of 5):</label>
+        <select name="defenseRating" required>
+          <option value="">Select</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+
+        <label>Teleop Notes:</label>
+        <textarea name="teleopNotes" placeholder="Any other teleop notes"></textarea>
+      </div>
+
+      <div id="endgame" class="tab-content hidden">
+        <label>Did they park?</label>
+        <select name="didPark" required>
+          <option value="">Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+
+        <label>Did they climb?</label>
+        <select name="didClimb" required>
+          <option value="">Select</option>
+          <option value="No">No</option>
+          <option value="Shallow Climb">Shallow Climb</option>
+          <option value="Deep Climb">Deep Climb</option>
+        </select>
+
+        <label>Endgame Notes:</label>
+        <textarea name="endgameNotes" placeholder="Any other endgame notes"></textarea>
+      </div>
+
       <button type="submit">Submit</button>
     </form>
   </main>
 
   <script>
+    // Tab switching
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active from all tabs
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Show the corresponding content, hide others
+        const target = tab.dataset.tab;
+        tabContents.forEach(tc => {
+          tc.id === target ? tc.classList.remove('hidden') : tc.classList.add('hidden');
+        });
+      });
+    });
+
     const form = document.getElementById('scoutingForm');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
+
+      // Add timestamp here before sending
+      data.submissionTime = new Date().toISOString();
 
       try {
         const res = await fetch('http://localhost:3001/submit', {
@@ -36,6 +157,11 @@
         if (res.ok) {
           alert('Scouting data submitted!');
           form.reset();
+          // Return to first tab on reset
+          tabs.forEach(t => t.classList.remove('active'));
+          tabs[0].classList.add('active');
+          tabContents.forEach(tc => tc.classList.add('hidden'));
+          tabContents[0].classList.remove('hidden');
         } else {
           alert('Failed to submit data');
         }
