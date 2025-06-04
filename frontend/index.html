@@ -27,7 +27,7 @@
       const data = Object.fromEntries(formData.entries());
 
       try {
-        const res = await fetch('http://localhost:3001/submit', {
+        const res = await fetch('https://script.google.com/macros/s/AKfycbwtJd4ZWVapLLjk7UgQD0_c370vn3Te5iJDn7vMCCZ0Tveamy34-pl70REGypwpa317Hg/exec', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
@@ -40,7 +40,7 @@
           alert('Failed to submit data');
         }
       } catch (err) {
-        alert('Error submitting data. Is the backend running?');
+        alert('Error submitting data. Is the script URL working and public?');
       }
     });
   </script>
