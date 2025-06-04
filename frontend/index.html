@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FRC Scouting Form</title>
+</head>
+<body>
+  <h1>FRC Scouting Form</h1>
+  <form id="scoutingForm">
+    <input name="scouterName" placeholder="Your Name" required /><br /><br />
+    <input name="teamNumber" placeholder="Team Number" required /><br /><br />
+    <textarea name="autoNotes" placeholder="Autonomous notes"></textarea><br /><br />
+    <textarea name="teleopNotes" placeholder="Teleop notes"></textarea><br /><br />
+    <textarea name="endgameNotes" placeholder="Endgame notes"></textarea><br /><br />
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('scoutingForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await fetch('http://localhost:3001/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (res.ok) {
+          alert('Scouting data submitted!');
+          form.reset();
+        } else {
+          alert('Failed to submit data');
+        }
+      } catch (err) {
+        alert('Error submitting data. Is the backend running?');
+      }
+    });
+  </script>
+</body>
+</html>
