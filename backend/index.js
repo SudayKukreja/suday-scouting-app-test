@@ -3,14 +3,20 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const ExcelJS = require('exceljs');
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-
+const PORT = 3001;
 const filePath = './scouting-data.xlsx';
 const workbook = new ExcelJS.Workbook();
 
+app.use(cors());
+app.use(bodyParser.json());
+
+// Serve frontend files
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Load or create Excel file
 async function loadWorkbook() {
   if (fs.existsSync(filePath)) {
     await workbook.xlsx.readFile(filePath);
@@ -21,6 +27,7 @@ async function loadWorkbook() {
   }
 }
 
+// Receive and store scouting data
 app.post('/submit', async (req, res) => {
   try {
     await loadWorkbook();
@@ -41,7 +48,7 @@ app.post('/submit', async (req, res) => {
   }
 });
 
-const PORT = 3001;
-app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
+// Start server on local network
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Backend running at http://192.168.1.10:${PORT}`);
 });
